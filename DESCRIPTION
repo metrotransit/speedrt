@@ -1,0 +1,29 @@
+Package: speedRT
+Title: Visualize speed from GTFS-RT data
+Version: 0.1.0
+Authors@R: 
+    c(person(given = "Joey",
+           family = "Reid",
+           role = c("aut", "cre"),
+           email = "joey.reid@metrotransit.org",
+           comment = c(ORCID = "0000-0001-6905-5235")), 
+    person(family = "MetroTransit Strategic Initiatives", role = "ctb"),
+    person(family = "Metropolitan Council", role = "cph"))
+Description: What the package does (one paragraph).
+License: MPL-2.0 | file LICENSE
+Encoding: UTF-8
+LazyData: true
+Imports:
+    data.table (>= 1.12.2),
+    rgeos,
+    sf,
+    sp,
+    shiny
+RoxygenNote: 6.1.1
+Suggests:
+    testthat (>= 2.1.0),
+    knitr,
+    rmarkdown,
+    RProtoBuf,
+    curl
+VignetteBuilder: knitr

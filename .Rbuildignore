@@ -1,0 +1,7 @@
+^setup_package\.R$
+^data-raw$
+^.*\.Rproj$
+^\.Rproj\.user$
+hmm\.R$
+script\.R$
+
