@@ -39,7 +39,7 @@ shinyServer(function(input, output, session) {
 	if (is.null(input$input_rt) || is.null(rv$sch)) return()
 	rv$route_stops <- rv$sch[as.character(route_short_name) == input$input_rt, .N, keyby = c('stop_name', 'stop_id')]
 	dat <- rv$stops_sf[rv$stops_sf$stop_id %in% rv$route_stops$stop_id,]
-	leafletProxy("inputmap", session) %>% addCircleMarkers(data = dat, fillColor = 'black', fillOpacity = 0.9, stroke = FALSE, layerId = ~stop_id)
+	leafletProxy("inputmap", session) %>% clearMarkers() %>% addCircleMarkers(data = dat, fillColor = 'black', fillOpacity = 0.9, stroke = FALSE, layerId = ~stop_id)
 
 	updateSelectizeInput(session, 'input_stops', choices = rv$route_stops, selected = NULL)
   })
