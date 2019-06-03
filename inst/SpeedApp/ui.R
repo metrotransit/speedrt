@@ -111,12 +111,12 @@ fluidPage(
           'tab_about',
           box(
             width = 6, solidHeader = TRUE, status = "primary", title = "Methodology",
-            p("Below lists steps taken in order to calculate bus travel speed:"),
+            p("Steps taken to calculate bus travel speed:"),
             tags$ol(
-              tags$li(p("Vehicle Position records are projected on to their respective route shapes")),
-              tags$li(p("records that are more than 30 meters (~100 ft) away from the route are discarded")),
-              tags$li(p("speed is calculated as the distance between consecutive messages divided by the time between consecutive messages (meters per second)")),
-              tags$li(p("for each trip, speed is linearly interpolated for every meter along the route"))
+              tags$li(p("Vehicle Position records are projected on to their respective route shapes.")),
+              tags$li(p("Records that are more than 30 meters (~100 ft) away from the route are discarded.")),
+              tags$li(p("Speed is calculated as the distance between consecutive messages divided by the time between consecutive messages (meters per second).")),
+              tags$li(p("For each trip, speed is linearly interpolated for every meter along the route."))
             ),
             p("Higher frequency sampling results in more accurate speeds along the route.")
           )
