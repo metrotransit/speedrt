@@ -192,7 +192,7 @@ shinyServer(function(input, output, session) {
 		# update date_range field of matched
 		intdate <- as.integer(strftime(input$date_after, '%Y%m%d'))
 		matched(matched()[, `:=` (date_range = paste(range(start_date, na.rm = TRUE), collapse = '\u2013')), by = start_date < intdate])
-	}
+	})
 
 	## Outputs for summary tab ####
 	## Polling rate histogram
