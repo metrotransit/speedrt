@@ -229,7 +229,7 @@ shinyServer(function(input, output, session) {
 		leafletProxy('speedline_map', session) %>% fitBounds(bounds[1], bounds[3], bounds[2], bounds[4])
 		
 		# interpolate speed along line
-		speed(speedOnLine(matched(), 3))
+		speed(speedOnLine(matched(), 3, rv$shapes, rv$crs))
   })
 
 	# update speed map
