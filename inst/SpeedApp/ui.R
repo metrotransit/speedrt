@@ -82,7 +82,7 @@ fluidPage(
       tags$hr(),
       ## inputs for visualization tabs #####
       conditionalPanel(
-        condition = "input.menu != 'about' & input.menu != 'load' & output.processed == true",
+        condition = "input.menu != 'tab_about' & input.menu != 'load' & output.processed == true",
         selectizeInput('rt_dir', "Route(s) - Direction(s)", choices = c(), multiple = TRUE, options = list('placeholder' = "multiple allowed")),
         actionButton('rt_dir_all', "Select All"),
         radioButtons(inputId = "compare", inline = FALSE, label = "Compare", choices = c("None" = 'None', "by Time of Day" = 'TOD', "by Day of Week" = 'DOW', "by Date Ranges" = 'date_range', "by Route" = 'route_short_name')),
