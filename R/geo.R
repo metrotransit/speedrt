@@ -13,6 +13,7 @@ NULL
 #' @param x either a long-lat pair \code{c(-93, 45)} or an sf POINT object.
 #'
 #' @return epsg of best fit UTM zone.
+#' @export
 inferUTM <- function(x) {
   if (inherits(x, 'sfg')) x <- st_coordinates(x)
   z <- ceiling((x[1] + 180)/6)
