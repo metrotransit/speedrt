@@ -86,7 +86,7 @@ plotSpeedDist <- function(speed, ci = 0, compare = 'None') {
 ## Cumulative travel time by distance plots ####
 speedToTT <- function(speed, compare = 'None') {
 	if (compare == 'None') compare <- NULL
-	speed[, tt := (timestamp - first(timestamp))/60, keyby = c('start_date', 'trip_id', 'shape_id', 'trip_desc', compare)]
+	speed[, tt := (timestamp - min(timestamp))/60, keyby = c('start_date', 'trip_id', 'shape_id', 'trip_desc', compare)]
 	# speed <- speed[tt < quantile(tt, .99) & tt >= 0]
 
 	if (is.null(compare)) {
