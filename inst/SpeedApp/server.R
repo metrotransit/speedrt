@@ -95,7 +95,8 @@ shinyServer(function(input, output, session) {
 	## Check for matching trip_ids
 	observe({
 		req(rv$vp, rv$trips)
-		tryCatch(trip_match <- rv$trips[rv$vp, on = 'trip_id', nomatch = NULL], error = function(e) error_msg('Unable to join vehicle positions to GTFS on trip_id, check that trip_ids in GTFS match trip_ids in vehicle positions file. IDs must be of same type (e.g., character, numeric) and have the same value.'))
+		trip_match <- tryCatch(rv$trips[rv$vp, on = 'trip_id', nomatch = NULL], error = function(e) {error_msg('Unable to join vehicle positions to GTFS on trip_id, check that trip_ids in GTFS match trip_ids in vehicle positions file. IDs must be of same type (e.g., character, numeric) and have the same value.'); return(e)})
+		if (inherits(trip_match, 'error')) return()
 		if (nrow(trip_match) == 0) error_msg('No trip_id values in vehicle positions match trip_id values in the GTFS. Check that you have the correct GTFS for the vehicle positions, and that the IDs match and are of the same type (e.g., character, or numeric).')
 	})
 
