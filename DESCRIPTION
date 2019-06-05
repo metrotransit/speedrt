@@ -13,6 +13,7 @@ Description: What the package does (one paragraph).
 License: MPL-2.0 | file LICENSE
 Encoding: UTF-8
 LazyData: true
+BugReports: https://github.com/metrotransit/speedrt/issues
 Imports:
     data.table (>= 1.12.2),
     rgeos,
