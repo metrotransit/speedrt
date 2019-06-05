@@ -87,11 +87,11 @@ fluidPage(
         actionButton('rt_dir_all', "Select All"),
         radioButtons(inputId = "compare", inline = FALSE, label = "Compare", choices = c("None" = 'None', "by Time of Day" = 'TOD', "by Day of Week" = 'DOW', "by Date Ranges" = 'date_range', "by Route" = 'route_short_name')),
         conditionalPanel(
-          condition = "input.compare == 'by Date Ranges'",
-          dateInput('date_after', "First day of After")
+          condition = "input.compare == 'date_range'",
+          dateInput('date_after', "First day of After Period")
         ),
         conditionalPanel(
-          condition = "input.compare != 'by Date Ranges'",
+          condition = "input.compare != 'date_range'",
           dateRangeInput('dr', "Date Range")
         ),
         conditionalPanel(

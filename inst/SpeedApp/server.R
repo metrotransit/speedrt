@@ -197,7 +197,7 @@ shinyServer(function(input, output, session) {
 		# date range
 		dr <- matched()[, as.Date(structure(range(timestamp, na.rm = TRUE), class = c('POSIXct', 'POSIXt'), tz = rv$tz))]
 		updateDateRangeInput(session, 'dr', start = dr[1], end = dr[2], min = dr[1], max = dr[2])
-		updateDateInput(session, 'date_after', min = dr[1], max = dr[2])
+		updateDateInput(session, 'date_after', value = dr[2], min = dr[1], max = dr[2])
 	})
 	observeEvent(input$rt_dir_all, {
 	    updateSelectizeInput(session, 'rt_dir', selected = rv$rd_choices)
@@ -206,8 +206,9 @@ shinyServer(function(input, output, session) {
 	observeEvent(input$date_after, {
 		req(input$date_after, matched())
 		# update date_range field of matched
-		intdate <- as.integer(strftime(input$date_after, '%Y%m%d'))
-		matched(matched()[, `:=` (date_range = paste(range(start_date, na.rm = TRUE), collapse = '\u2013')), by = start_date < intdate])
+		intdate = as.integer(strftime(input$date_after, '%Y%m%d'))
+		matched_dr = matched()[, `:=` (date_range = ifelse(start_date < intdate, 'Before', 'After')), by = start_date < intdate]
+		matched(matched_dr)
 	})
 
 	## Outputs for summary tab ####
