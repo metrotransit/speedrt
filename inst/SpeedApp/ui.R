@@ -164,7 +164,7 @@ fluidPage(
                                box(width = 6, solidHeader = TRUE, title = "4. Select stops for start and end of route segment.", status = "primary",
                                selectizeInput('input_stops', 'Select two stop_ids to define route segment. Both stops should serve the same direction.', choices = c(), options = list(placeholder = "Select two:", maxItems = 2))
                                    ),
-                               actionButton('process_action', "Click to process data", class = "primary"),
+                               actionButton('process_action', "Process data", class = "primary"),
                                conditionalPanel("output.processed == true", {
                                  box(width = 6, solidHeader = TRUE, title = "5. Save Processed Data for Future Use", status = "primary", downloadButton('saveProcessed', "Download ZIP File"))})
                       ), 
