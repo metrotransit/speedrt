@@ -2,9 +2,14 @@ shinyServer(function(input, output, session) {
   # if (Sys.getenv('R_ZIPCMD') == '') Sys.setenv(R_ZIPCMD = "/usr/bin/zip")
   rv <- reactiveValues(stops = NULL, trips = NULL, stop_times = NULL, route_stops = NULL, routes = NULL, shapes = NULL, route_names = NULL, sch = NULL, vp = NULL, time_lu = NULL, rd_choices = NULL, crs = NULL)
 	matched <- reactiveVal(NULL)
-	upload_fail <- reactiveVal(NULL)
+	error_msg <- reactiveVal(NULL)
 	speed <- reactiveVal(NULL)
   
+  ## Update upload fail message
+	observeEvent(error_msg(), {
+		showModal(modalDialog(title = "Error:", p(error_msg()), easyClose = TRUE, fade = FALSE), session)
+	})
+
   ## On GTFS Load, update reactive values ####
   observeEvent(input$gtfs_file, {
   	gtfs_file <- input$gtfs_file
@@ -80,9 +85,18 @@ shinyServer(function(input, output, session) {
 		if (is.null(vp_file$datapath)) return()
 
 		# read vehicle positions, may be zipped?
-		rv$vp <- fread(vp_file$datapath)
+		vp = fread(vp_file$datapath)
+
+		rv$vp <- vp
 		if (is.null(rv$crs)) rv$crs <- inferUTM(rv$vp[1, c(longitude, latitude)])
 		setkeyv(rv$vp, c('timestamp', 'trip_id'))
+	})
+
+	## Check for matching trip_ids
+	observe({
+		req(rv$vp, rv$trips)
+		tryCatch(trip_match <- rv$trips[rv$vp, on = 'trip_id', nomatch = NULL], error = function(e) error_msg('Unable to join vehicle positions to GTFS on trip_id, check that trip_ids in GTFS match trip_ids in vehicle positions file. IDs must be of same type (e.g., character, numeric) and have the same value.'))
+		if (nrow(trip_match) == 0) error_msg('No trip_id values in vehicle positions match trip_id values in the GTFS. Check that you have the correct GTFS for the vehicle positions, and that the IDs match and are of the same type (e.g., character, or numeric).')
 	})
 
 	## Process data ####
@@ -149,20 +163,20 @@ shinyServer(function(input, output, session) {
 		if (proc_file$type == 'application/zip') {
 			fpath <- unzip(proc_file$datapath, exdir = tempdir())
 			fpath <- list.files(fpath, pattern = '^processed\\.csv', full.names = TRUE)
-			try(vp <- fread(fpath), TRUE)
 		} else {
 			fpath <- proc_file$datapath
-			vp <- fread(fpath)
 		}
+		tryCatch(vp <- fread(fpath), error = function(e) {error_msg(e); vp <- NULL})
 		if (!"data.table" %in% class(vp)) {
-			upload_fail("File uploaded is not supported. Please upload a zipped csv.")
+			error_msg("Unable to read a data.table from uploaded file. Please upload a zipped csv.")
 			return()
 		}
 
 		# check required fields
 		req_fields <- c('start_date', 'trip_id', 'vehicle_id', 'timestamp', 'latitude', 'longitude')
-		if (!all(req_fields %in% names(vp))) {
-			upload_fail(paste("Required fields not found in processed vehicle positions file:", paste(req_fields, collapse = ',')))
+		missing_ix <- !req_fields %in% names(vp)
+		if (any(missing_ix)) {
+			error_msg(paste("Required fields", paste(req_fields[missing_ix], collapse = ','), " not found in uploaded vehicle positions file."))
 			return()
 		}
 
