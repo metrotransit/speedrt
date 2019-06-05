@@ -233,17 +233,14 @@ shinyServer(function(input, output, session) {
 
 	## Map speeds ####
 	# initialize map
-	output$speedline_map <- renderLeaflet({
-		leaflet(options = leafletOptions(zoomControl = FALSE)) %>% htmlwidgets::onRender("function(el, x) {L.control.zoom({ position: 'bottomleft'}).addTo(this)}") %>% addProviderTiles('Stamen.TonerLite')
-	})
-	outputOptions(output, 'speedline_map', suspendWhenHidden = FALSE)
-
 	observeEvent(matched(), {
 		req(matched(), rv$shapes)
-		## initialize map
+		## set map bounds
 		bounds <- matched()[, c(range(match_lon), range(match_lat))]
-		leafletProxy('speedline_map', session) %>% fitBounds(bounds[1], bounds[3], bounds[2], bounds[4])
-		
+		output$speedline_map <- renderLeaflet({
+			leaflet() %>% addProviderTiles('Stamen.TonerLite') %>% fitBounds(bounds[1], bounds[3], bounds[2], bounds[4])
+		})
+		outputOptions(output, 'speedline_map', suspendWhenHidden = FALSE)
 		# interpolate speed along line
 		speed(speedOnLine(matched(), 3, rv$shapes, rv$crs))
   })
