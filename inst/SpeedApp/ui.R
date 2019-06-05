@@ -129,7 +129,7 @@ fluidPage(
                       tabPanel(title = "Load Raw Vehicle Positions",
                                tags$br(),
                                box(width = 6, solidHeader = TRUE, title = '1. Load GTFS', status = 'primary', 
-                                   fileInput('gtfs_file', "Choose GTFS feed ZIP file:"),
+                                   fileInput('gtfs_file', "Choose GTFS feed ZIP file:", accept = c('application/zip', '.zip')),
                                    p("The GTFS file should be a zipped GTFS feed, with valid for the dates in the vehicle positions data, and matching trip_id identifiers"),
                                    br(),
                                    # htmlOutput("upload_msg"),
@@ -143,7 +143,7 @@ fluidPage(
                                ),
                                box(width = 6, solidHeader = TRUE, title = '2. Load Vehicle Positions', status = 'primary', 
                                    
-                                   fileInput('vp_file', "Choose Vehicle Positions csv:"),
+                                   fileInput('vp_file', "Choose Vehicle Positions csv:", accept = c('text/csv', 'text/comma-separated-values', 'text/plain', '.csv')),
                                    HTML("<p>The Vehicle Positions file is a csv of vehicle positions. It must include trip_id, timestamp, latitude, longitude and vehicle_id. See <code>readVehiclePosition</code> in this package (speedRT) to convert protobuf VehiclePosition files."),
                                    br(),
                                    selectizeInput('tz', label = "Choose the correct timezone for the vehicle position messages", choices = OlsonNames(), selected = Sys.timezone()),
@@ -174,7 +174,7 @@ fluidPage(
                                  width = 12, solidHeader = TRUE, title = "Upload data from computer", status = 'primary', 
                                  p(strong("Zipped csv files processed by the app.")),
                                  br(),
-                                 fileInput('proc_file', "Choose input ZIP file:"),
+                                 fileInput('proc_file', "Choose input ZIP file:", accept = c('application/zip', '.zip')),
                                  br(),
                                  # htmlOutput("upload_msg"),
                                  tags$head(tags$style("#upload_msg{color: #ED1B2E;
