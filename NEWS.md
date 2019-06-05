@@ -1,3 +1,8 @@
+# speedRT 0.1.1-9000
+* Simplified user interface for file uploads, GTFS currently required for both raw
+and pre-processed. 
+* Fix date range comparisons
+
 # speedRT 0.1.1
 
 * Added a `NEWS.md` file to track changes to the package.
