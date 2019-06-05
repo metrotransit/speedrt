@@ -5,34 +5,28 @@ suppressMessages(invisible(lapply(libs, library, character.only = TRUE)))
 options(shiny.maxRequestSize = 100 * 1024^2)
 
 ## Data ####
-dow_scale <- c('Sunday' = 'gray30', "Monday" = "#0053A0", "Tuesday" = "#ED1B2E", "Wednesday" = "#FFD200", "Thursday" = "#008144", "Friday" = "#F68A1E", 'Saturday' = 'grey60')
-tod_scale <- c("Early" = "#0053A0", "AM Peak" = "#ED1B2E", "Midday" = "#FFD200", "PM Peak" = "#008144", "Evening" = "#F68A1E", "Owl" = "gray")
+color_scales = list(DOW = c('Sunday' = 'gray30', "Monday" = "#0053A0", "Tuesday" = "#ED1B2E", "Wednesday" = "#FFD200", "Thursday" = "#008144", "Friday" = "#F68A1E", 'Saturday' = 'grey60'),
+	TOD = c("Early" = "#0053A0", "AM Peak" = "#ED1B2E", "Midday" = "#FFD200", "PM Peak" = "#008144", "Evening" = "#F68A1E", "Owl" = "gray"),
+	date_range = c(First = "#0053A0", Second = "#ED1B2E"),
+	route_short_name = c("#0053A0", "#ED1B2E", "#FFD200", "#008144", "#F68A1E",
+			"#00cdcd, #551a8b", "#000000", "#ff8197", "#7c2020"),
+	None = "#0053A0")
 
 
 ## Plotting functions ####
 plotSpeedHistogram <- function(avl, compare) {
 	limits <- avl[, quantile(mps, c(0.01, 0.99), na.rm = TRUE)]
 	temp_points <- avl[limits[1] <= mps & mps <= limits[2] & is.finite(mps)]
-	if (compare == "shape_id") {
+	if (compare == "None") {
 		low <- quantile(temp_points$mps, 0.05, na.rm = TRUE)
 		med <- median(temp_points$mps, na.rm = TRUE)
 		high <- quantile(temp_points$mps, 0.95, na.rm = TRUE)
-		ggplot(data = temp_points) + geom_density(aes(x = mps), fill = "#0053A0", color = "#0053A0", alpha = 0.1) + geom_vline(xintercept = c(med, low, high), linetype = 2) + geom_label(aes(x = med, y = 0, label = c("median"))) + geom_label(aes(x = low, y = 0, label = c("5th"))) + geom_label(aes(x = high, y = 0, label = c("95th"))) + labs(x = "Estimated Speed (m/s)", y = "Count", title = paste0(round(med, 2), " [", round(low, 2), ", ", round(high, 2), "] m/s")) + theme_bw()
-	} else if (compare == "TOD") {
-		tt <- temp_points[, .(med = median(mps, na.rm = TRUE)), keyby = TOD]
-		ggplot(data = temp_points) + geom_density(aes(x = mps, group = TOD, color = TOD, fill = TOD), alpha = 0.1) + geom_vline(aes(xintercept = med, color = TOD), data = tt, linetype = 2) + labs(x = "Estimated Speed (m/s)", y = "Count", title = paste(paste0(tt$TOD, ": ", round(tt$med, 1)), collapse = ", ")) + theme_bw() + scale_fill_manual(values = tod_scale) + scale_color_manual(values = tod_scale)
-	} else if (compare == "DOW") {
-		tt <- temp_points[, .(med = median(mps, na.rm = TRUE)), keyby = DOW]
-		ggplot(data = temp_points) + geom_density(aes(x = mps, group = DOW, color = DOW, fill = DOW), alpha = 0.1) + geom_vline(aes(xintercept = med, color = DOW), linetype = 2, data = tt) + labs(x = "Estimated Speed (m/s)", y = "Count", title = paste(paste0(tt$DOW, ": ", round(tt$med, 1)), collapse = ", ")) + theme_bw() + scale_fill_manual(values = dow_scale) + scale_color_manual(values = dow_scale)
-	} else if (compare == "between Date Ranges") {
-		tt <- temp_points[, .(med = median(mps, na.rm = TRUE)), keyby = DR]
-		ggplot(data = temp_points) + geom_density(aes(x = mps, group = DR, color = DR, fill = DR), alpha = 0.1) + geom_vline(aes(xintercept = med, color = DR), data = tt, linetype = 2) + labs(x = "Estimated Speed (m/s)", y = "Count", title = paste(paste0(tt$DR, ": ", round(tt$med, 1)), collapse = ", ")) + theme_bw() + scale_fill_manual(values = c(First = "#0053A0", Second = "#ED1B2E")) + scale_color_manual(values = c(First = "#0053A0", Second = "#ED1B2E"))
+		p = ggplot() + geom_density(data = temp_points, aes(x = mps, color = I("#0053A0"), fill = I("#0053A0")), alpha = 0.1) + geom_vline(xintercept = c(med, low, high), linetype = 2) + geom_label(aes(x = med, y = 0, label = c("median"))) + geom_label(aes(x = low, y = 0, label = c("5th"))) + geom_label(aes(x = high, y = 0, label = c("95th"))) + labs(title = paste0(round(med, 1), " [", round(low, 1), ", ", round(high, 1), "] m/s"))
 	} else {
-		tt <- temp_points[, .(med = median(mps, na.rm = TRUE)), by = route_short_name]
-		cols <- c("#0053A0", "#ED1B2E", "#FFD200", "#008144", "#F68A1E",
-			"#00cdcd, #551a8b", "#000000", "#ff8197", "#7c2020")[1:nrow(tt)]
-		ggplot() + geom_density(data = temp_points, aes(x = mps, group = route_short_name, color = route_short_name, fill = route_short_name), alpha = 0.1) + geom_vline(data = tt, aes(xintercept = med, color = route_short_name), linetype = 2) + labs(x = "Estimated Speed (m/s)", y = "Count", title = paste(paste0(tt$route_short_name, ": ", round(tt$med, 1)), collapse = ", ")) + theme_bw() + scale_fill_manual(values = cols) + scale_color_manual(values = cols)
+		tt <- temp_points[, .(med = median(mps, na.rm = TRUE)), keyby = compare]
+		p = ggplot() + geom_density(data = temp_points, aes(x = mps, group = eval(as.name(compare)), color = eval(as.name(compare)), fill = eval(as.name(compare))), alpha = 0.1) + geom_vline(aes(xintercept = med, color = eval(as.name(compare))), data = tt, linetype = 2) + scale_fill_manual('', values = color_scales[[compare]]) + scale_color_manual('', values = color_scales[[compare]]) + labs(title = tt[, paste(paste0(eval(as.name(compare)), ": ", round(med, 1)), collapse = ", ")])
 	}
+	p + labs(x = "Estimated Speed (m/s)", y = "Count") + theme_bw()
 }
 
 ## Plot speed lines ####
