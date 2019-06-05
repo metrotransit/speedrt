@@ -18,13 +18,18 @@ Imports:
     data.table (>= 1.12.2),
     rgeos,
     sf,
-    sp,
-    shiny
+    sp
 RoxygenNote: 6.1.1
 Suggests:
     testthat (>= 2.1.0),
     knitr,
     rmarkdown,
     RProtoBuf,
-    curl
+    curl,
+    shiny,
+    ggplot2,
+    leaflet,
+    rgdal,
+    shinydashboard,
+    stringi
 VignetteBuilder: knitr
