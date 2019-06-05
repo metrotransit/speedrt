@@ -10,7 +10,7 @@
 #' @param rstudio launch in rstudio viewer instead of web browser? 
 #' @param ... passed to shiny::runApp
 launch_speedapp <- function(sao = NULL, rstudio = Sys.getenv("RSTUDIO") == "1", ...) {
-  launch.browser <- if (!rstudio) 
+  launch.browser <- if(!rstudio) {
 		TRUE 
     } else {
 		getOption("shiny.launch.browser", interactive())
