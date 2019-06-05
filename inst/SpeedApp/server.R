@@ -224,7 +224,7 @@ shinyServer(function(input, output, session) {
 
 	## Speed histogram
 	output$summary_speed <- renderPlot({
-		req(avl <- matched())
+		req(avl <- matched(), input$rt_dir)
 		# filter on inputs: date range, day type, time range
 		dr <- as.integer(strftime(input$dr, '%Y%m%d'))
 		rt_dir <- tstrsplit(input$rt_dir, ' - ', fixed = TRUE, type.convert = TRUE, names = c('route_short_name', 'direction_id'))
