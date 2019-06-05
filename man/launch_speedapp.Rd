@@ -4,7 +4,8 @@
 \alias{launch_speedapp}
 \title{Internal launch function}
 \usage{
-launch_speedapp(sao, rstudio = Sys.getenv("RSTUDIO") == "1", ...)
+launch_speedapp(sao = NULL, rstudio = Sys.getenv("RSTUDIO") == "1",
+  ...)
 }
 \arguments{
 \item{sao}{speedapp object}
