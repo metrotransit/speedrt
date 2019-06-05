@@ -122,25 +122,25 @@ fluidPage(
           )
         ), # end methods box
         ## load tab ####
-        tabItem(
-          'load',
-          tabsetPanel(type = "pills", id = "load_method",
-	          box(width = 6, solidHeader = TRUE, title = '1. Load GTFS', status = 'primary',
-		          fileInput('gtfs_file', "Choose GTFS feed ZIP file:", accept = c('application/zip', '.zip')),
-		          p("The GTFS file should be a zipped GTFS feed, with valid for the dates in the vehicle positions data, and matching trip_id identifiers")
-	          ),
-	          tabPanel(title = "Load Raw Vehicle Positions",
-		          box(width = 6, solidHeader = TRUE, title = '2. Load Vehicle Positions', status = 'primary',
-		          fileInput('vp_file', "Choose Vehicle Positions csv:", accept = c('text/csv', 'text/comma-separated-values', 'text/plain', '.csv')),
-		          HTML("<p>The Vehicle Positions file is a csv of vehicle positions. It must include trip_id, timestamp, latitude, longitude and vehicle_id. See <code>readVehiclePosition</code> in this package (speedRT) to convert protobuf VehiclePosition files."),
-		          br(),
-		          selectizeInput('tz', label = "Choose the correct timezone for the vehicle position messages", choices = OlsonNames(), selected = Sys.timezone())
-	          ),
-	          box(width = 6, solidHeader = TRUE, title = "3. Select stops for start and end of route segment.", status = "primary",
-		          actionButton('process_action', "Process data", class = "primary"),
-		          conditionalPanel("output.processed == true", {box(width = 6, solidHeader = TRUE, title = "4. Save Processed Data for Future Use", status = "primary", downloadButton('saveProcessed', "Download ZIP File"))})
-	          )
-		),
+        tabItem('load',
+	        box(width = 12, solidHeader = TRUE, title = '1. Load GTFS', status = 'primary',
+		        fileInput('gtfs_file', "Choose GTFS feed ZIP file:", accept = c('application/zip', '.zip')),
+		        p("The GTFS file should be a zipped GTFS feed, with valid for the dates in the vehicle positions data, and matching trip_id identifiers")
+	        ),
+	        tabsetPanel(type = "pills", id = "load_method",
+		        tabPanel(title = "Load Raw Vehicle Positions",
+			        br(),
+			        box(width = 6, solidHeader = TRUE, title = '2. Load Vehicle Positions', status = 'primary',
+				        fileInput('vp_file', "Choose Vehicle Positions csv:", accept = c('text/csv', 'text/comma-separated-values', 'text/plain', '.csv')),
+				        HTML("<p>The Vehicle Positions file is a csv of vehicle positions. It must include trip_id, timestamp, latitude, longitude and vehicle_id. See <code>readVehiclePosition</code> in this package (speedRT) to convert protobuf VehiclePosition files."),
+				        br(),
+				        selectizeInput('tz', label = "Choose the correct timezone for the vehicle position messages", choices = OlsonNames(), selected = Sys.timezone())
+			        ),
+					box(width = 6, solidHeader = TRUE, title = "3. Select stops for start and end of route segment.", status = "primary",
+						actionButton('process_action', "Process data", class = "primary"),
+						conditionalPanel("output.processed == true", {box(width = 6, solidHeader = TRUE, title = "4. Save Processed Data for Future Use", status = "primary", downloadButton('saveProcessed', "Download ZIP File"))})
+					)
+				),
 				tabPanel(title = "Upload Processed Vehicle Positions",
 					tags$br(),
 					box(width = 12, solidHeader = TRUE, title = "Upload data from computer", status = 'primary',
