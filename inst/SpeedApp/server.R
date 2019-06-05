@@ -163,7 +163,7 @@ shinyServer(function(input, output, session) {
 		# read vehicle positions
 		if (proc_file$type == 'application/zip') {
 			fpath <- unzip(proc_file$datapath, exdir = tempdir())
-			fpath <- list.files(fpath, pattern = '^processed\\.csv', full.names = TRUE)
+			fpath <- grep('processed\\.csv$', fpath, value = TRUE)
 		} else {
 			fpath <- proc_file$datapath
 		}
