@@ -9,12 +9,15 @@
 #' @param sao speedapp object
 #' @param rstudio launch in rstudio viewer instead of web browser? 
 #' @param ... passed to shiny::runApp
-launch_speedapp <- function(sao, rstudio = Sys.getenv("RSTUDIO") == "1", ...) {
+launch_speedapp <- function(sao = NULL, rstudio = Sys.getenv("RSTUDIO") == "1", ...) {
   launch.browser <- if (!rstudio) 
-    TRUE else getOption("shiny.launch.browser", interactive())
+		TRUE 
+    } else {
+		getOption("shiny.launch.browser", interactive())
+	}
   
   .sao_env$.SPEEDAPP_OBJECT <- sao  # see zzz.R for .sao_env
-  on.exit(.sso_env$.SPEEDAPP_OBJECT <- NULL, add = TRUE)
+  on.exit(.sao_env$.SPEEDAPP_OBJECT <- NULL, add = TRUE)
   shiny::runApp(system.file("SpeedApp", package = "speedRT"), 
                 launch.browser = launch.browser, ...)
 }
