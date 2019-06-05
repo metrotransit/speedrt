@@ -126,7 +126,7 @@ fluidPage(
           'load',
           tabsetPanel(type = "pills", id = "load_method",
           
-                      tabPanel(title = "Load raw Vehicle Positions",
+                      tabPanel(title = "Load Raw Vehicle Positions",
                                tags$br(),
                                box(width = 6, solidHeader = TRUE, title = '1. Load GTFS', status = 'primary', 
                                    fileInput('gtfs_file', "Choose GTFS feed ZIP file:"),
