@@ -242,7 +242,7 @@ shinyServer(function(input, output, session) {
 		# filter on inputs: date range, day type, time range
 		dr <- as.integer(strftime(input$dr, '%Y%m%d'))
 		rt_dir <- tstrsplit(input$rt_dir, ' - ', fixed = TRUE, type.convert = TRUE, names = c('route_short_name', 'direction_id'))
-		avl <- avl[between(Time, input$time[1], input$time[2]) & between(start_date, dr[1], dr[2])][as.data.table(rt_dir), on = c('route_short_name', 'direction_id')]
+		avl <- avl[between(Time, input$time[1] * 3600, input$time[2] * 3600) & between(start_date, dr[1], dr[2])][as.data.table(rt_dir), on = c('route_short_name', 'direction_id')]
 		plotSpeedHistogram(avl, input$compare)
 	})
 
