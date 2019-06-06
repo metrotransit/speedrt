@@ -195,6 +195,8 @@ shinyServer(function(input, output, session) {
 			return()
 		}
 
+		# Convert variables
+		vp[, `:=` (Time = as.ITime(Time), TOD = factor(TOD, levels = c('AM Peak', 'Midday', 'PM Peak', 'Evening', 'Owl'), ordered = TRUE))]
 		setkeyv(vp, c('start_date', 'trip_id', 'vehicle_id', 'timestamp'))
 		matched(vp)
 		if (is.null(rv$crs)) rv$crs <- inferUTM(matched()[1, c(longitude, latitude)])
