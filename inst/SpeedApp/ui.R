@@ -16,13 +16,6 @@ fluidPage(
         overflow-y: auto;
       }
       .inner > div.info {display: none;}
-      /* display loading message */
-      html.shiny-busy header.main-header nav.navbar::after {
-        position: fixed; top: 5px; right: 2em; padding:1em;
-        background-color: #ee010177;
-        clear: unset;
-        content: 'Loading... Please wait';
-      }
       /* Update buttons */
       button.btn, button.btn:hover, button.btn-default, button.btn-default:hover, button.btn-default:focus, button.btn-default:active {
         font: system-ui;
@@ -44,6 +37,7 @@ fluidPage(
       html.shiny-busy button, html.shiny-busy button.btn {
         -webkit-appearance: button;
         -moz-appearance: button;
+        color: #ddd;
       }
       button.btn-default, button.btn {
         -webkit-appearance: default-button;
@@ -136,10 +130,10 @@ fluidPage(
 				        br(),
 				        selectizeInput('tz', label = "Choose the correct timezone for the vehicle position messages", choices = OlsonNames(), selected = Sys.timezone())
 			        ),
-					box(width = 6, solidHeader = TRUE, title = "3. Select stops for start and end of route segment.", status = "primary",
-						actionButton('process_action', "Process data", class = "primary"),
-						conditionalPanel("output.processed == true", {box(width = 6, solidHeader = TRUE, title = "4. Save Processed Data for Future Use", status = "primary", downloadButton('saveProcessed', "Download ZIP File"))})
-					)
+          conditionalPanel("output.vp_loaded == true", {box(width = 6, solidHeader = TRUE, title = "3. Process Vehicle Location Data", status = "primary",
+						actionButton('process_action', "Process data")
+						)}),
+					conditionalPanel("output.processed == true", {box(width = 6, solidHeader = TRUE, title = "4. Save Processed Data for Future Use", status = "primary", downloadButton('saveProcessed', "Download ZIP File"))})
 				),
 				tabPanel(title = "Upload Processed Vehicle Positions",
 					tags$br(),
