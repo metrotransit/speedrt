@@ -67,7 +67,7 @@ fluidPage(
                   menuItem(text = "Load Vehicle Positions", icon = icon("cloud-upload"), tabName = 'load'),
                   menuItem(text = "Visualize Speed", icon = icon("map"),
                            menuSubItem(text = "Summary", tabName = 'tab_summary'),
-                           menuSubItem(text = "Speed Line", tabName = 'tab_speedline'),
+                           menuSubItem(text = "Speed Map", tabName = 'tab_speedmap'),
                            menuSubItem(text = "Speed by Distance", tabName = 'tab_speeddist'),
                            menuSubItem(text = "Time by Distance", tabName = 'tab_timedist')
                            ),
@@ -157,9 +157,9 @@ fluidPage(
             plotOutput('summary_speed')
           )
         ),
-        ## speed line tab ####
+        ## speed map tab ####
         tabItem(
-          'tab_speedline',
+          'tab_speedmap',
           fluidRow(
             column(2, sliderInput('sl_colorrange', "Color Range", min = 0, max = 30, value = c(0, 20))),
             conditionalPanel(
@@ -171,7 +171,7 @@ fluidPage(
           conditionalPanel("output.speed_ready", {
             downloadButton('saveShapefile', "Download ESRI Shapefile")
           }), 
-          leafletOutput('speedline_map', height = 800)
+          leafletOutput('speed_map', height = 800)
         ),
         ## speed by distance tab ####
         tabItem(

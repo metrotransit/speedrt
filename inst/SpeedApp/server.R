@@ -252,17 +252,17 @@ shinyServer(function(input, output, session) {
 		req(matched(), rv$shapes)
 		## set map bounds
 		bounds <- matched()[, c(range(match_lon), range(match_lat))]
-		output$speedline_map <- renderLeaflet({
+		output$speed_map <- renderLeaflet({
 			leaflet() %>% addProviderTiles('Stamen.TonerLite') %>% fitBounds(bounds[1], bounds[3], bounds[2], bounds[4])
 		})
-		outputOptions(output, 'speedline_map', suspendWhenHidden = FALSE)
+		outputOptions(output, 'speed_map', suspendWhenHidden = FALSE)
 		# interpolate speed along line
 		speed(speedOnLine(matched(), 3, rv$shapes, rv$crs))
   })
 
 	# update speed map
 	sl_colorrange <- debounce(reactive(input$sl_colorrange), 1000)
-	observe({
+	observeEvent(speed(), {
 	  req(speed())
 	  # aggregate
 	  # TODO: add filters and grouping
@@ -279,7 +279,7 @@ shinyServer(function(input, output, session) {
 	  speedScale <- colorNumeric('magma', domain = speed_domain)
 
 	  # update map
-	  leafletProxy('speedline_map', session, data = speed) %>% clearMarkers() %>% clearControls() %>% addCircles(lng = ~lon_imp, lat = ~lat_imp, color = ~speedScale(med), radius = 10, label = ~paste0(round(med, 1), " m/s"), group = "Median") %>% addCircles(lng = ~lon_imp, lat = ~lat_imp, color = ~speedScale(avg), radius = 10, label = ~paste0(round(avg, 1), " m/s"), group = "Average") %>% addCircles(lng = ~lon_imp, lat = ~lat_imp, color = ~speedScale(low), radius = 10, label = ~paste0(round(low, 1), " m/s"), group = "5th Percentile") %>% addCircles(lng = ~lon_imp, lat = ~lat_imp, color = ~speedScale(hi), radius = 10, label = ~paste0(round(hi, 1), " m/s"), group = "95th Percentile") %>% addLegend(position = "bottomright", pal = speedScale, values = seq(speed_domain[1], speed_domain[2], length.out = 5), title = 'Speed (m/s)') %>% addLayersControl(baseGroups = c('Median', 'Average', '5th Percentile', '95th Percentile'), position = 'bottomleft')
+	  leafletProxy('speed_map', session, data = speed) %>% clearMarkers() %>% clearControls() %>% addCircles(lng = ~lon_imp, lat = ~lat_imp, color = ~speedScale(med), radius = 10, label = ~paste0(round(med, 1), " m/s"), group = "Median") %>% addCircles(lng = ~lon_imp, lat = ~lat_imp, color = ~speedScale(avg), radius = 10, label = ~paste0(round(avg, 1), " m/s"), group = "Average") %>% addCircles(lng = ~lon_imp, lat = ~lat_imp, color = ~speedScale(low), radius = 10, label = ~paste0(round(low, 1), " m/s"), group = "5th Percentile") %>% addCircles(lng = ~lon_imp, lat = ~lat_imp, color = ~speedScale(hi), radius = 10, label = ~paste0(round(hi, 1), " m/s"), group = "95th Percentile") %>% addLegend(position = "bottomright", pal = speedScale, values = seq(speed_domain[1], speed_domain[2], length.out = 5), title = 'Speed (m/s)') %>% addLayersControl(baseGroups = c('Median', 'Average', '5th Percentile', '95th Percentile'), position = 'bottomleft')
 	})
 	
 	## Speed by distance plot ####
