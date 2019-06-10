@@ -45,7 +45,7 @@ logVehiclePositions <- function(feed, refresh = 10L, duration = 10L, output = NU
 	
 	if (is.null(output)) output <- tempdir()
 	tic <- Sys.time()
-	while(as.numeric(as.difftime(Sys.time() - tic, units = 's')) < duration) {
+	while(as.numeric(as.difftime(Sys.time() - tic), units = 'secs') < duration) {
 		path <- fetch_feed(feed, output = file.path(output, paste0('vehiclePosition_', strftime(Sys.time(), format = '%Y%m%d%H%M%S'))))
 		Sys.sleep(refresh)
 	}
