@@ -2,6 +2,11 @@
 * Simplified user interface for file uploads, GTFS currently required for both raw
 and pre-processed. 
 * Fix date range comparisons
+* `logVehiclePositions` becomes `logProtobufFeed`, works for any protobuf
+  * Fixed duration check for logging pb feeds
+  * Logged filenames are based off of the feed name, e.g., tripupdates.pb 
+  becomes tripupdates_20190610112300.pb and VehiclePositions.pb becomes
+  VehiclePositions_20190610112300.pb
 
 # speedRT 0.1.1
 

@@ -27,40 +27,41 @@ readVehiclePosition <- function(descriptor) {
 	}))
 }
 
-#' Log GTFS-RT Vehicle Positions
-#' @param feed URL for GTFS-Realtime feed with VehiclePosition messages.
-#' @param refresh minimum time in seconds between queries of the GTFS-Realtime feed.
+#' Log Protobuf Feeds including GTFS-RT Vehicle Positions
+#' @param feed URL of protobuf file.
+#' @param refresh minimum time in seconds between queries of the protobuf feed.
 #' @param duration total time in seconds to query feed.
 #' @param output location to save files, if \code{NULL} will save to a tempfile.
 #'
-#' @return path to saved realtime files
+#' @return path to saved protobuf files
 #' @export
-logVehiclePositions <- function(feed, refresh = 10L, duration = 10L, output = NULL) {
+logProtobufFeed <- function(feed, refresh = 10L, duration = 10L, output = NULL) {
 	# check for feed
 	if (missing(feed)) stop('Parameter "feed" is missing. Please provide a valid GTFS-Realtime URL')
 	
 	if(!requireNamespace("curl", quietly = TRUE)) {
-		stop('Install curl to use logVehiclePositions')
+		stop('Install curl to use logProtoFeed')
 	}
 	
 	if (is.null(output)) output <- tempdir()
 	tic <- Sys.time()
+	pb_type = basename(feed)
 	while(as.numeric(as.difftime(Sys.time() - tic), units = 'secs') < duration) {
-		path <- fetch_feed(feed, output = file.path(output, paste0('vehiclePosition_', strftime(Sys.time(), format = '%Y%m%d%H%M%S'))))
+		path <- fetch_feed(feed, output = file.path(output, gsub('\\.', paste0(strftime(Sys.time(), format = '_%Y%m%d%H%M%S.')), pb_type)))
 		Sys.sleep(refresh)
 	}
 	output
 }
 
-#' Log GTFS-RT Vehicle Positions
-#' @param feed URL for GTFS-Realtime feed with VehiclePosition messages.
-#' @param output path for download
+#' Download protobuf files
+#' @param feed URL for protobuf file.
+#' @param output path for download (directory).
 #' @return response content
 fetch_feed <- function(feed, output) {
 # Load feed and check status
 	resp <- curl::curl_fetch_disk(feed, output)
 	if (resp$status_code != 200) {
-		stop('Attempt to download VehiclePositions feed failed with error:', 'HTTP Status ', resp$status_code)
+		stop(gettextf('Attempt to download protobuf feed %s failed with error: HTTP Status %s', feed, resp$status_code))
 	}
 	
 	resp$content

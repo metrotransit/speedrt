@@ -2,18 +2,18 @@
 % Please edit documentation in R/vehicle_positions.R
 \name{fetch_feed}
 \alias{fetch_feed}
-\title{Log GTFS-RT Vehicle Positions}
+\title{Download protobuf files}
 \usage{
 fetch_feed(feed, output)
 }
 \arguments{
-\item{feed}{URL for GTFS-Realtime feed with VehiclePosition messages.}
+\item{feed}{URL for protobuf file.}
 
-\item{output}{path for download}
+\item{output}{path for download (directory).}
 }
 \value{
 response content
 }
 \description{
-Log GTFS-RT Vehicle Positions
+Download protobuf files
 }
