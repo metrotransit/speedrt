@@ -2,9 +2,10 @@
 % Please edit documentation in R/launch_speedapp.R
 \name{launch_speedapp}
 \alias{launch_speedapp}
-\title{Internal launch function}
+\title{Launch the Shiny Speed app}
 \usage{
-launch_speedapp(sao, rstudio = Sys.getenv("RSTUDIO") == "1", ...)
+launch_speedapp(sao = NULL, rstudio = Sys.getenv("RSTUDIO") == "1",
+  ...)
 }
 \arguments{
 \item{sao}{speedapp object}
@@ -14,5 +15,5 @@ launch_speedapp(sao, rstudio = Sys.getenv("RSTUDIO") == "1", ...)
 \item{...}{passed to shiny::runApp}
 }
 \description{
-Internal launch function
+Launch the Shiny Speed app
 }

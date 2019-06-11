@@ -27,7 +27,8 @@ test_that('Bad path errors', {
 ## Test realtime related functions ####
 context('GTFS-realtime')
 vp <- system.file('extdata', 'vehiclePositions', package = 'speedRT')
-feed <- "https://svc.metrotransit.org/mtgtfs/vehicle/VehiclePositions.pb"
+feed_vp <- "https://svc.metrotransit.org/mtgtfs/vehicle/VehiclePositions.pb"
+feed_tu <- "https://svc.metrotransit.org/mtgtfs/tripupdate/tripupdates.pb"
 
 test_that('Read sample vehiclePositions', {
 	dt <- readVehiclePosition(vp)
@@ -37,8 +38,16 @@ test_that('Read sample vehiclePositions', {
 
 test_that('Vehicle Positions log', {
 output <- tempdir()
-expect_equal(result <- logVehiclePositions(feed, refresh = 1, duration = 2.9), output)
-pbs <- list.files(output, pattern = '^vehiclePosition_', full.names = TRUE)
+expect_equal(result <- logProtobufFeed(feed_vp, refresh = 1, duration = 2.9), output)
+pbs <- list.files(output, pattern = '^VehiclePositions_.+pb$', full.names = TRUE)
+expect_gte(length(pbs), 2)
+unlink(pbs)
+})
+
+test_that('Trip Updates log', {
+output <- tempdir()
+expect_equal(result <- logProtobufFeed(feed_tu, refresh = 1, duration = 2.9), output)
+pbs <- list.files(output, pattern = '^tripupdates_.+pb$', full.names = TRUE)
 expect_gte(length(pbs), 2)
 unlink(pbs)
 })

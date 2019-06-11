@@ -8,6 +8,13 @@
 \description{
 What the package does (one paragraph).
 }
+\seealso{
+Useful links:
+\itemize{
+  \item Report bugs at \url{https://github.com/metrotransit/speedrt/issues}
+}
+
+}
 \author{
 \strong{Maintainer}: Joey Reid \email{joey.reid@metrotransit.org} (0000-0001-6905-5235)
 
