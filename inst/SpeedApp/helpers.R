@@ -49,32 +49,44 @@ speedOnLine <- function(avl, by_dist = 1, shapes, crs) {
 plotSpeedDist <- function(speed, ci = 0, compare = 'None') {
 	ci <- as.numeric(ci)
 	# TODO: add filtering
-	sum_tab <- speed[!is.na(mps), as.list(quantile(mps, c(ci, 0.5, 1 - ci))), keyby = c('shape_id', 'avl_dist_traveled')]
-	setnames(sum_tab, 3:5, c('low', 'Median', 'high'))
+	if (compare == 'None') {
+	  sum_tab <- speed[!is.na(mps), as.list(quantile(mps, c(ci, 0.5, 1 - ci))), keyby = c('shape_id', 'avl_dist_traveled')]
+	} else {
+	  sum_tab <- speed[!is.na(mps), as.list(quantile(mps, c(ci, 0.5, 1 - ci))), keyby = c('shape_id', 'avl_dist_traveled', compare)]
+	}
+	setnames(sum_tab, setdiff(names(sum_tab), key(sum_tab)), c('low', 'Median', 'high'))
 	ptitle <- "Speed by Distance - Median"
 	ribbon <- NULL
-	pos <- ifelse(compare == 'None', 'none', 'bottom')
-	col_scale <- switch(compare,
-			'TOD' = color_scales$TOD,
-			'DOW' = color_scales$DOW,
-			'between Date Ranges' = c("First" = "#0053A0", "Second" = "#ED1B2E"),
-			'route_short_name' = c("#0053A0", "#ED1B2E", "#FFD200", "#008144", "#F68A1E", "#00cdcd", "#551a8b", "#000000", "#ff8197", "#7c2020")[seq_len(sum_tab[, uniqueN(compare)])],
-			'None' = '#0053A0')
+	pos <- ifelse(is.null(compare), 'none', 'bottom')
+	col_scale <- if (compare == 'route_short_name') {
+	  color_scales[[compare]][seq_len(sum_tab[, uniqueN(compare)])]
+	} else {
+	  color_scales[[compare]]
+	}
 
 	if (ci > 0) {
 		ptitle <- paste0(ptitle, " and ", paste0(100 * (1 - 2 * as.numeric(ci)), '%'), " Confidence Interval")
 		ribbon <- geom_ribbon(aes(x = avl_dist_traveled, ymin = low, ymax = high, group = compare), alpha = 0.2, fill = "#0053A0")
 	}
 
-	p <- ggplot(data = sum_tab) +
-		geom_line(aes(x = avl_dist_traveled, y = Median, color = compare), size = 1) +
-		theme_bw() +
-		labs(x = "Distance along segment in meters", y = "Speed (m/s)", title = ptitle) +
-		theme(legend.position = pos) +
-		scale_color_manual('', values = col_scale) +
-		ribbon +
-		facet_grid(rows = vars(shape_id))
-	p
+	p <- ggplot(data = sum_tab)
+	p <- if (compare == 'None') {
+	  p +
+	    geom_line(aes(x = avl_dist_traveled, y = Median), size = 1)
+	} else {
+	  p +
+	    geom_line(aes(x = avl_dist_traveled, y = Median, color = eval(as.name(compare))), size = 1)
+	}
+	
+	p + theme_bw() +
+	  scale_color_manual('', values = col_scale) +
+	  labs(x = "Distance along segment in meters", y = "Speed (m/s)", title = ptitle) +
+	  theme(legend.position = pos) +
+	  ribbon +
+	  facet_grid(rows = vars(shape_id)) +
+	  theme_bw() +
+	  labs(x = "Distance along segment in meters", y = "Speed (m/s)", title = ptitle) +
+	  theme(legend.position = pos)
 }
 
 ## Cumulative travel time by distance plots ####
