@@ -264,8 +264,8 @@ shinyServer(function(input, output, session) {
 
 	# update speed map
 	sl_colorrange <- debounce(reactive(input$sl_colorrange), 1000)
-	observeEvent(speed(), {
-	  req(speed())
+	observe({
+	  req(speed(), cancelOutput = TRUE)
 	  # aggregate
 	  # TODO: add filters and grouping
 	  grouping <- c('shape_id', 'avl_dist_traveled', 'lon_imp', 'lat_imp')
