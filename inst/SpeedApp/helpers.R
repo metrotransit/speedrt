@@ -55,8 +55,8 @@ plotSpeedDist <- function(speed, ci = 0, compare = 'None') {
 	ribbon <- NULL
 	pos <- ifelse(compare == 'None', 'none', 'bottom')
 	col_scale <- switch(compare,
-			'TOD' = tod_scale,
-			'DOW' = dow_scale,
+			'TOD' = color_scales$TOD,
+			'DOW' = color_scales$DOW,
 			'between Date Ranges' = c("First" = "#0053A0", "Second" = "#ED1B2E"),
 			'route_short_name' = c("#0053A0", "#ED1B2E", "#FFD200", "#008144", "#F68A1E", "#00cdcd", "#551a8b", "#000000", "#ff8197", "#7c2020")[seq_len(sum_tab[, uniqueN(compare)])],
 			'None' = '#0053A0')
@@ -68,11 +68,11 @@ plotSpeedDist <- function(speed, ci = 0, compare = 'None') {
 
 	p <- ggplot(data = sum_tab) +
 		geom_line(aes(x = avl_dist_traveled, y = Median, color = compare), size = 1) +
-		theme_bw() + 
+		theme_bw() +
 		labs(x = "Distance along segment in meters", y = "Speed (m/s)", title = ptitle) +
-		theme(legend.position = pos) + 
-		scale_color_manual('', values = col_scale) + 
-		ribbon + 
+		theme(legend.position = pos) +
+		scale_color_manual('', values = col_scale) +
+		ribbon +
 		facet_grid(rows = vars(shape_id))
 	p
 }
@@ -91,10 +91,10 @@ speedToTT <- function(speed, compare = 'None') {
 
 	slots <- names(speed_split)[!sapply(speed_split, function(x) nrow(x) == 0)]
 	result <- lapply(slots, function(x) {
-		p <- ggplot(data = speed_split[[x]]) + 
+		p <- ggplot(data = speed_split[[x]]) +
 		geom_line(aes(x = avl_dist_traveled, y = tt, group = interaction(start_date, trip_id), color = trip_desc)) +
 		theme_bw() +
-		scale_color_discrete('Route') + 
+		scale_color_discrete('Route') +
 		labs(x = "Distance along segment in meters", y = "Time traveled since the start of the segment in minutes", title = paste("Time Traveled by Distance -", x))
 		p
 	})
