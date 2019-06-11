@@ -250,22 +250,23 @@ shinyServer(function(input, output, session) {
 
 	## Map speeds ####
 	# initialize map
+	output$speed_map <- renderLeaflet({
+	  req(matched(), cancelOutput = TRUE)
+	  bounds <- matched()[, c(range(match_lon), range(match_lat))]
+	  leaflet() %>% addProviderTiles('Stamen.TonerLite') %>% fitBounds(bounds[1], bounds[3], bounds[2], bounds[4])
+	})
+	outputOptions(output, 'speed_map', suspendWhenHidden = FALSE)
+	
 	observeEvent(matched(), {
-		req(matched(), rv$shapes)
-		## set map bounds
-		bounds <- matched()[, c(range(match_lon), range(match_lat))]
-		output$speed_map <- renderLeaflet({
-			leaflet() %>% addProviderTiles('Stamen.TonerLite') %>% fitBounds(bounds[1], bounds[3], bounds[2], bounds[4])
-		})
-		outputOptions(output, 'speed_map', suspendWhenHidden = FALSE)
-		# interpolate speed along line
+		req(matched(), rv$shapes, rv$crs)
+	  # interpolate speed along line
 		speed(speedOnLine(matched(), 3, rv$shapes, rv$crs))
   })
 
 	# update speed map
 	sl_colorrange <- debounce(reactive(input$sl_colorrange), 1000)
 	observe({
-	  req(speed(), cancelOutput = TRUE)
+	  req(speed(), input$menu == 'tab_speedmap')
 	  # aggregate
 	  # TODO: add filters and grouping
 	  grouping <- c('shape_id', 'avl_dist_traveled', 'lon_imp', 'lat_imp')
