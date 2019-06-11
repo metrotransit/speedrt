@@ -148,13 +148,19 @@ fluidPage(
         ## summary tab ####
         tabItem(
           'tab_summary',
+          fluidRow(
+            box(
+              width = 6, solidHeader = TRUE, status = "primary", title = "Speed Histogram",
+              plotOutput('summary_speed')
+            ),
+            box(
+              width = 6, solidHeader = TRUE, status = "primary", title = "Travel Time",
+              plotOutput('summary_tt')
+            )
+          ), 
           box(
             width = 6, solidHeader = TRUE, status = "primary", title = "Polling Rate",
             plotOutput('summary_polling_hist', height = '200px')
-          ),
-          box(
-            width = 6, solidHeader = TRUE, status = "primary", title = "Speed Histogram",
-            plotOutput('summary_speed')
           )
         ),
         ## speed map tab ####

@@ -29,6 +29,18 @@ plotSpeedHistogram <- function(avl, compare) {
 	p + labs(x = "Estimated Speed (m/s)", y = "Count") + theme_bw()
 }
 
+plotTTHistogram <- function(avl, compare) {
+  if (compare == 'None') compare <- NULL
+	tt = avl[is.finite(timestamp), .(tt = diff(range(timestamp))/60), keyby = c('start_date', 'trip_id', 'shape_id', 'trip_desc', compare)]
+	p = ggplot(data = tt, aes(x = tt))
+	p = if (is.null(compare)) {
+	  p + stat_density(color = 'white', position = 'identity', alpha = 0.3)
+	} else {
+	  p + stat_density(aes(fill = eval(as.name(compare))), color = 'white', position = 'identity', alpha = 0.3) + scale_fill_manual('', values = color_scales[[compare]])
+	}
+	  p + labs(x = "Travel time (minutes)", y = "Count") + theme_bw() + facet_grid(rows = vars(shape_id))
+}
+
 ## Plot speed lines ####
 interpolateLatLon <- function(d, id, shapes, crs) {
 	# generate spatial line from shape
