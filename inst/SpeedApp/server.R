@@ -4,7 +4,7 @@ shinyServer(function(input, output, session) {
 	matched <- reactiveVal(NULL)
 	error_msg <- reactiveVal(NULL)
 	speed <- reactiveVal(NULL)
-  
+
   ## Update upload fail message
 	observeEvent(error_msg(), {
 		showModal(modalDialog(title = "Error:", p(error_msg()), easyClose = TRUE, fade = FALSE), session)
@@ -14,7 +14,7 @@ shinyServer(function(input, output, session) {
   observeEvent(input$gtfs_file, {
   	gtfs_file <- input$gtfs_file
   	if (is.null(gtfs_file$datapath)) return()
-  	
+
 	rv$gtfspath <- gtfs_file$datapath
 
   	# read GTFS tables
@@ -26,18 +26,18 @@ shinyServer(function(input, output, session) {
   	rv$route_names <- stringi::stri_sort(unique(rv$routes$route_short_name), opts_collator = stringi::stri_opts_collator(numeric = TRUE))
   	rv$sch <- rv$stops[rv$routes[rv$trips[rv$stop_times, on = 'trip_id'], on = 'route_id'], on = 'stop_id']
   	rv$stops_sf <- st_as_sf(rv$stops, coords = c('stop_lon', 'stop_lat'), crs = 4326)
-  	  	
+
   	## Update UI
   	updateSelectInput(session, 'input_rt', choices = c("Select one" = "", rv$route_names))
-  	
+
   	## initiate map
   	bounds <- rv$stops[, c(range(stop_lon), range(stop_lat))]
   	output$inputmap <- renderLeaflet({
   		leaflet(options = leafletOptions(zoomControl = FALSE)) %>% htmlwidgets::onRender("function(el, x) {L.control.zoom({ position: 'bottomleft'}).addTo(this)}") %>% addProviderTiles('Stamen.TonerLite') %>% fitBounds(bounds[1], bounds[3], bounds[2], bounds[4])
   	})
-  	
+
   })
-  
+
   ## Select stops from map ####
   # Update route stops from route selection
   observe({
@@ -49,7 +49,7 @@ shinyServer(function(input, output, session) {
 	updateSelectizeInput(session, 'input_stops', choices = rv$route_stops, selected = NULL)
   })
 
-  
+
   # update selected from marker clicks
   observe({
     event <- input$inputmap_marker_click
@@ -62,12 +62,12 @@ shinyServer(function(input, output, session) {
     	updateSelectizeInput(session, 'input_stops', selected = select_update)
     })
   })
-  
+
   # update markers for removed stops
   observe({
   	selected <- input$input_stops
   	req(selected)
-  	
+
   	isolate({
   		leafletProxy("inputmap", session) %>% addCircleMarkers(data = rv$stops_sf[rv$stops_sf$stop_id %in% rv$route_stops$stop_id,], fillColor = 'black', fillOpacity = 0.9, stroke = FALSE, layerId = ~stop_id) %>% addCircleMarkers(data = rv$stops_sf[rv$stops_sf$stop_id %in% selected,], fillColor = 'red', fillOpacity = 0.9, stroke = FALSE, layerId = ~stop_id)
   	})
@@ -155,11 +155,11 @@ shinyServer(function(input, output, session) {
 
 		matched(filtered)
 	})
-	
+
 	# signal availability of processed dataset
 	output$processed <- reactive({return(!is.null(matched()))})
 	outputOptions(output, 'processed', suspendWhenHidden = FALSE)
-	
+
 	## Save processed data
 	output$saveProcessed <- downloadHandler(
 		filename = paste0('vp_', strftime(Sys.Date(), '%Y%m%d'), "_", "_processed.zip"),
@@ -206,7 +206,7 @@ shinyServer(function(input, output, session) {
 	## Update select inputs from matched data ####
 	observeEvent(matched(), {
 		req(matched())
-		
+
 		# routes and directions
 		rv$rd_choices <- matched()[, .N, keyby = c('route_short_name', 'direction_id')][, paste(route_short_name, direction_id, sep = ' - ')]
 		updateSelectizeInput(session, 'rt_dir', choices = rv$rd_choices, selected = rv$rd_choices)
@@ -234,7 +234,7 @@ shinyServer(function(input, output, session) {
 
 		pollhist <- matched()[, .(delta = diff(timestamp)), keyby = c('start_date', 'vehicle_id', 'trip_id', 'route_short_name')][0 < delta, .N, keyby = c('route_short_name', 'delta')]
 		output$summary_polling_hist <- renderPlot({
-			ggplot(data = pollhist, aes(x = delta, y = N, fill = route_short_name)) + geom_col() + labs(x = "Effective Polling Rate", y = "") + scale_y_continuous(labels = scales::comma) + theme_minimal() + scale_fill_hue('Route')
+			ggplot(data = pollhist, aes(x = delta, y = N, fill = route_short_name)) + geom_col() + labs(x = "Effective Polling Rate (sec)", y = "") + scale_y_continuous(labels = scales::comma) + theme_minimal() + scale_fill_hue('Route')
 		})
 	})
 
@@ -270,7 +270,7 @@ shinyServer(function(input, output, session) {
 	  # TODO: add filters and grouping
 	  grouping <- c('shape_id', 'avl_dist_traveled', 'lon_imp', 'lat_imp')
 	  speed <- speed()[!is.na(mps), .(med = median(mps), avg = mean(mps), low = quantile(mps, 0.05), hi = quantile(mps, 0.95)), keyby = grouping]
-	  
+
 	  # Create colorscale
 	  if (isTRUE(input$sl_autocolorrange)) {
 	    speed_domain <- range(unlist(speed[, lapply(.SD, range, na.rm = TRUE), .SDcols = c('med', 'avg', 'low', 'hi')][, lapply(.SD, range)]))
@@ -283,7 +283,7 @@ shinyServer(function(input, output, session) {
 	  # update map
 	  leafletProxy('speed_map', session, data = speed) %>% clearMarkers() %>% clearControls() %>% addCircles(lng = ~lon_imp, lat = ~lat_imp, color = ~speedScale(med), radius = 10, label = ~paste0(round(med, 1), " m/s"), group = "Median") %>% addCircles(lng = ~lon_imp, lat = ~lat_imp, color = ~speedScale(avg), radius = 10, label = ~paste0(round(avg, 1), " m/s"), group = "Average") %>% addCircles(lng = ~lon_imp, lat = ~lat_imp, color = ~speedScale(low), radius = 10, label = ~paste0(round(low, 1), " m/s"), group = "5th Percentile") %>% addCircles(lng = ~lon_imp, lat = ~lat_imp, color = ~speedScale(hi), radius = 10, label = ~paste0(round(hi, 1), " m/s"), group = "95th Percentile") %>% addLegend(position = "bottomright", pal = speedScale, values = seq(speed_domain[1], speed_domain[2], length.out = 5), title = 'Speed (m/s)') %>% addLayersControl(baseGroups = c('Median', 'Average', '5th Percentile', '95th Percentile'), position = 'bottomleft')
 	})
-	
+
 	## Speed by distance plot ####
 	output$speed_dist <- renderPlot({
 		req(speed())
