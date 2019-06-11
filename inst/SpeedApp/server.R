@@ -267,11 +267,18 @@ shinyServer(function(input, output, session) {
 	sl_colorrange <- debounce(reactive(input$sl_colorrange), 1000)
 	observe({
 	  req(speed(), input$menu == 'tab_speedmap')
+	  
+	  progress <- Progress$new(session, min = 0, max = 4)
+	  on.exit(progress$close())
+	  progress$set(message = 'Mapping speed data',
+                 detail = 'Please wait.')
+		progress$set(value = 1)
 	  # aggregate
 	  # TODO: add filters and grouping
 	  grouping <- c('shape_id', 'avl_dist_traveled', 'lon_imp', 'lat_imp')
 	  speed <- speed()[!is.na(mps), .(med = median(mps), avg = mean(mps), low = quantile(mps, 0.05), hi = quantile(mps, 0.95)), keyby = grouping]
 
+	  progress$set(value = 2)
 	  # Create colorscale
 	  if (isTRUE(input$sl_autocolorrange)) {
 	    speed_domain <- range(unlist(speed[, lapply(.SD, range, na.rm = TRUE), .SDcols = c('med', 'avg', 'low', 'hi')][, lapply(.SD, range)]))
@@ -280,9 +287,11 @@ shinyServer(function(input, output, session) {
 	    speed_domain <- as.numeric(sl_colorrange())
 	  }
 	  speedScale <- colorNumeric('magma', domain = speed_domain)
+	  progress$set(value = 3)
 
 	  # update map
 	  leafletProxy('speed_map', session, data = speed) %>% clearMarkers() %>% clearControls() %>% addCircles(lng = ~lon_imp, lat = ~lat_imp, color = ~speedScale(med), radius = 10, label = ~paste0(round(med, 1), " m/s"), group = "Median") %>% addCircles(lng = ~lon_imp, lat = ~lat_imp, color = ~speedScale(avg), radius = 10, label = ~paste0(round(avg, 1), " m/s"), group = "Average") %>% addCircles(lng = ~lon_imp, lat = ~lat_imp, color = ~speedScale(low), radius = 10, label = ~paste0(round(low, 1), " m/s"), group = "5th Percentile") %>% addCircles(lng = ~lon_imp, lat = ~lat_imp, color = ~speedScale(hi), radius = 10, label = ~paste0(round(hi, 1), " m/s"), group = "95th Percentile") %>% addLegend(position = "bottomright", pal = speedScale, values = seq(speed_domain[1], speed_domain[2], length.out = 5), title = 'Speed (m/s)') %>% addLayersControl(baseGroups = c('Median', 'Average', '5th Percentile', '95th Percentile'), position = 'bottomleft')
+	  progress$set(value = 4)
 	})
 
 	## Speed by distance plot ####
