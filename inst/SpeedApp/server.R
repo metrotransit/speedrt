@@ -297,7 +297,7 @@ shinyServer(function(input, output, session) {
 	## Speed by distance plot ####
 	output$speed_dist <- renderPlot({
 		req(speed())
-		plotSpeedDist(speed(), input$ci, input$compare)
+		plotSpeedDist(speed(), input$compare, input$ci)
 	})
 
 	## Cumulative time by distance plot ####
