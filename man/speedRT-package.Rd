@@ -6,7 +6,8 @@
 \alias{speedRT-package}
 \title{speedRT: Visualize speed from GTFS-RT data}
 \description{
-What the package does (one paragraph).
+Analyzing and vizualize transit vehicle speed using standard
+  transit data.
 }
 \seealso{
 Useful links:

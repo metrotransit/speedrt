@@ -10,7 +10,7 @@ Authors@R:
     person(family = "MetroTransit Strategic Initiatives", role = "ctb"),
     person(family = "Metropolitan Council", role = "cph"))
 Description: Analyzing and vizualize transit vehicle speed using standard
-transit data. 
+  transit data. 
 License: MPL-2.0 | file LICENSE
 Encoding: UTF-8
 LazyData: true
