@@ -1,3 +1,6 @@
+# speedRT 0.1.1-9000
+* Add travel time histogram to summary tab
+
 # speedRT 0.1.1
 
 * Added a `NEWS.md` file to track changes to the package.
