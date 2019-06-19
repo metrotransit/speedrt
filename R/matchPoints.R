@@ -21,6 +21,9 @@ NULL
 #' @param tz timezone of observations
 #' @param within_dist distance in units of CRS (typically meters) from shape. 
 #'   Vehicle positions outside of distance will be dropped from the result.
+#' @param time_lu data.table keyed on "Time". See \code{\link{time_lu}}.
+#' @param service_lu a keyed data.table.
+#'  Use \code{\link{lookupService}} to create the table.
 #' 
 #' @return data.table with trip_id, route_id, latitude, longitude, timestamp, 
 #'   vehicle_id, start_date, match_lat, match_lon, and avl_dist_traveled.
@@ -33,11 +36,14 @@ NULL
 #' matched <- matchAVL(avl, gtfs = system.file('extdata', 'gtfs.zip', package = 'speedRT'))
 #' }
 matchAVL <- function(avl, gtfs, crs = inferUTM(avl[1, c(longitude, latitude)]), 
-                     tz = Sys.timezone(), within_dist = 30) {
+                     tz = Sys.timezone(), within_dist = 30, time_lu = speedRT::time_lu, service_lu = lookupService(gtfs)) {
 	# avoid warnings from data.table NSE
-	shape_id <- geom <- timestamp <- trip_id <- longitude <- latitude <- avl_dist_traveled <- NULL
+	shape_id <- geom <- timestamp <- trip_id <- longitude <- latitude <- avl_dist_traveled <- i.service_name <- i.route_short_name <- route_short_name <- trip_headsign <- start_date <- NULL
 	trips <- readGTFS('trips', gtfs)
-	avl_names <- union(c('start_date', 'trip_id', 'vehicle_id', 'timestamp', 'latitude', 'longitude', 'match_lat', 'match_lon', 'avl_dist_traveled'), names(avl))
+	routes = readGTFS('routes', gtfs)
+	# convert trip_id to character to match GTFS-realtime spec ("string")
+	trips[, `:=` (trip_id = as.character(trip_id))]
+	avl_names <- union(c('start_date', 'trip_id', 'vehicle_id', 'timestamp', 'latitude', 'longitude', 'shape_id', 'route_short_name', 'service_id', 'direction_id', 'trip_headsign', 'trip_desc', 'service_name', 'TOD', 'DOW', 'date_range', 'Time', 'match_lat', 'match_lon', 'avl_dist_traveled'), names(avl))
 	
 	# fill missing start_date
 	if (!'start_date' %in% names(avl)) avl[, `:=` (start_date = as.integer(strftime(as.Date(structure(first(timestamp), class = c('POSIXct', 'POSIXt'), tz = tz), tz = tz), format = '%Y%m%d'))), by = trip_id]
@@ -53,6 +59,15 @@ matchAVL <- function(avl, gtfs, crs = inferUTM(avl[1, c(longitude, latitude)]),
 	# project points onto shape
 	avl_trips[(inrange), c('avl_dist_traveled', 'match_lat', 'match_lon') := distanceAlongShape(longitude, latitude, first(shape_id), crs, shape_geo), by = 'shape_id']
 	
+	# add metadata from GTFS
+	avl_trips[routes, on = 'route_id', `:=` (route_short_name = i.route_short_name)]
+	avl_trips[, `:=` (trip_desc = paste(route_short_name, trip_headsign, sep = ' - ')), by = 'shape_id']
+	avl_trips[, `:=` (Time = as.ITime(structure(timestamp, class = c('POSIXct', 'POSIXt'), tz = tz), tz = tz))]
+	avl_trips = time_lu[avl_trips, on = 'Time', roll = TRUE]
+	avl_trips[, `:=` (DOW = weekdays(as.Date(as.character(start_date), format = '%Y%m%d')))]
+	avl_trips[, `:=` (date_range = paste(range(start_date, na.rm = TRUE), collapse = '\u2013'))]
+	avl_trips[service_lu, on = 'service_id', `:=` (service_name = i.service_name)]
+
 	avl_trips[(inrange), avl_names, with = FALSE]
 }
 
@@ -141,12 +156,12 @@ filterMatches <- function(avl_matches, max_speed = Inf) {
   # remove rows with negative distance traveled, until only positive distances
 	filtered <- avl_matches[!(bad_odo)]
 	setkeyv(filtered, c('start_date', 'trip_id', 'vehicle_id', 'timestamp'))
-	filtered[!is.na(avl_dist_traveled), `:=` (mps = c(NA_real_, diff(avl_dist_traveled)/diff(timestamp))), by = c('start_date', 'trip_id', 'vehicle_id')]
+	filtered[!is.na(avl_dist_traveled), `:=` (mps = c(NA_real_, diff(avl_dist_traveled)/as.numeric(diff(timestamp), units = 'secs'))), by = c('start_date', 'trip_id', 'vehicle_id')]
   while (TRUE) {
     n <- nrow(filtered)
     filtered <- filtered[0 <= dist_to_next & (is.na(mps) | mps < max_speed)]
     filtered[, `:=` (dist_to_next = c(diff(avl_dist_traveled), 0)), by = c('start_date', 'trip_id', 'vehicle_id')]
-    filtered[!is.na(avl_dist_traveled), `:=` (mps = c(NA_real_, diff(avl_dist_traveled)/diff(timestamp))), by = c('start_date', 'trip_id', 'vehicle_id')]
+    filtered[!is.na(avl_dist_traveled), `:=` (mps = c(NA_real_, diff(avl_dist_traveled)/as.numeric(diff(timestamp), units = 'secs'))), by = c('start_date', 'trip_id', 'vehicle_id')]
     if (n == nrow(filtered)) break
   }
 
@@ -159,6 +174,5 @@ filterMatches <- function(avl_matches, max_speed = Inf) {
   filtered[, 'bad_odo' := NULL]
 	# replace NaN (divide by 0) speed with 0
 	filtered[is.nan(mps), mps := 0]
-	filtered[is.infinite(mps), mps := NA]
-	filtered
+	filtered[is.finite(mps)]
 }

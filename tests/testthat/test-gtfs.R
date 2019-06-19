@@ -31,8 +31,10 @@ feed_vp <- "https://svc.metrotransit.org/mtgtfs/vehicle/VehiclePositions.pb"
 feed_tu <- "https://svc.metrotransit.org/mtgtfs/tripupdate/tripupdates.pb"
 
 test_that('Read sample vehiclePositions', {
-	dt <- readVehiclePosition(vp)
-	expect_equal(nrow(dt), 11)
+	dt_list = lapply(list.files(vp, full.names = TRUE), readVehiclePosition)
+	dt = rbindlist(dt_list)
+	expect_equal(length(dt_list), 3)
+	expect_equal(nrow(dt), 32)
 	expect_equal(names(dt), c("trip_id", "start_date", "route_id", "latitude", "longitude", "bearing", "current_stop_sequence", "current_status", "timestamp", "vehicle_id"))
 })
 
@@ -54,5 +56,5 @@ unlink(pbs)
 
 test_that('Service lookup', {
   service_lu <- lookupService(gtfs)
-  expect_identical(service_lu, data.table(service_id = 'MAR19-MVS-BUS-Weekday-01', service_name = 'Weekday', key = 'service_id'))
+  expect_identical(service_lu, data.table(service_id = 'JUN19-MVS-BUS-Weekday-01', service_name = 'Weekday', key = 'service_id'))
 })

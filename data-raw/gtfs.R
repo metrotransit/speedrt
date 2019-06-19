@@ -13,6 +13,8 @@ route2 <- routes[route_short_name == 2]
 agency <- readGTFS('agency', gtfs)
 trips <- readGTFS('trips', gtfs)
 trips2 <- trips[route_id == route2$route_id & service_id == srv]
+# fix trip_id
+trips2[, `:=` (trip_id = gsub('^(\\d+?)-.+?$', '\\1', trip_id))]
 stop_times <- readGTFS('stop_times', gtfs)
 stop_times2 <- stop_times[trips2[, .(trip_id)], on = 'trip_id']
 stops <- readGTFS('stops', gtfs)

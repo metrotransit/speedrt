@@ -17,11 +17,11 @@ test_that('converts shapes.txt to linestrings', {
 })
 
 test_that('align shapes correctly', {
-  target <- data.table(shape_id = c(20009, 20010, 20017, 20018, 20019), from_dist = c(486.1249004, 486.1249004, 10886.1812798, 7964.8241467, 11331.6176890), to_dist = c(1923.0282543, 1923.0282543, 9449.2594608, 6527.9023277, 9894.6958700), stop_order = c(1, 1, 2, 2, 2), key = 'shape_id')
+  target <- data.table(shape_id = c(20001, 20002, 20003, 20004, 20005), from_dist = c(486.1249004, 11331.6176890, 10886.1812798, 486.1249004, 7964.8241467), to_dist = c(1923.0282543, 9894.6958700, 9449.2594608, 1923.0282543, 6527.9023277), stop_order = c(1, 2, 2, 1, 2), key = 'shape_id')
   # infer CRS
   expect_equal(target, alignShapes(gtfs, from_stop = 13337, to_stop = 13320))
   # specify CRS
   expect_equal(target, alignShapes(gtfs, from_stop = 13337, to_stop = 13320, crs = 26915))
   # subset shapes
-  expect_equal(target[shape_id %in% c(20009, 20010)], alignShapes(gtfs, from_stop = 13337, to_stop = 13320, shape_ids = c(20009, 20010)))
+  expect_equal(target[shape_id %in% c(20001, 20002)], alignShapes(gtfs, from_stop = 13337, to_stop = 13320, shape_ids = c(20001, 20002)))
 })

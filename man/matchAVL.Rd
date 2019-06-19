@@ -5,7 +5,8 @@
 \title{Match AVL positions to route shapes}
 \usage{
 matchAVL(avl, gtfs, crs = inferUTM(avl[1, c(longitude, latitude)]),
-  tz = Sys.timezone(), within_dist = 30)
+  tz = Sys.timezone(), within_dist = 30, time_lu = speedRT::time_lu,
+  service_lu = lookupService(gtfs))
 }
 \arguments{
 \item{avl}{a data.table. Required fields: trip_id, start_date, latitude, 
@@ -21,6 +22,11 @@ used eventually.}
 
 \item{within_dist}{distance in units of CRS (typically meters) from shape. 
 Vehicle positions outside of distance will be dropped from the result.}
+
+\item{time_lu}{data.table keyed on "Time". See \code{\link{time_lu}}.}
+
+\item{service_lu}{a keyed data.table.
+Use \code{\link{lookupService}} to create the table.}
 }
 \value{
 data.table with trip_id, route_id, latitude, longitude, timestamp, 

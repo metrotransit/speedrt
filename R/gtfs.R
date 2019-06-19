@@ -16,7 +16,11 @@
 readGTFS <- function(name = c('agency', 'stops', 'routes', 'trips', 'stop_times', 'calendar', 'calendar_dates', 'fare_attributes', 'fare_rules', 'shapes', 'frequencies', 'transfers', 'feed_info'), gtfs) {
   name <- match.arg(name, choices = c('agency', 'stops', 'routes', 'trips', 'stop_times', 'calendar', 'calendar_dates', 'fare_attributes', 'fare_rules', 'shapes', 'frequencies', 'transfers', 'feed_info'))
   table_name <- paste0(name, '.txt')
-  table <- fread(cmd = paste("unzip -cq", shQuote(path.expand(gtfs)), table_name))
+	if (name %in% c('trips', 'stop_times', 'frequencies')) {
+		table <- fread(cmd = paste("unzip -cq", shQuote(path.expand(gtfs)), table_name), colClasses = c('trip_id' = 'character'))
+	} else {
+		table <- fread(cmd = paste("unzip -cq", shQuote(path.expand(gtfs)), table_name))
+	}
   return(table)
 }
 

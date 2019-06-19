@@ -86,6 +86,7 @@ shinyServer(function(input, output, session) {
 
 		# read vehicle positions, may be zipped?
 		vp = fread(vp_file$datapath)
+		vp[, trip_id := as.character(trip_id)]
 
 		rv$vp <- vp
 		if (is.null(rv$crs)) rv$crs <- inferUTM(rv$vp[1, c(longitude, latitude)])
@@ -107,10 +108,12 @@ shinyServer(function(input, output, session) {
 		req(rv$gtfspath, rv$vp, rv$tz)
 
 	  ## Provide progress feedback
-	  progress <- Progress$new(session, min = 0, max = 8)
+	  progress <- Progress$new(session, min = 0, max = 2)
 	  on.exit(progress$close())
 	  progress$set(message = 'Processing Vehicle Location Data',
                  detail = 'This may take a while...')
+
+		progress$set(value = 0)
 		## match to shapes
 		mm <- matchAVL(rv$vp, rv$gtfspath, rv$crs, tz = rv$tz)
 		progress$set(value = 1)
@@ -118,40 +121,6 @@ shinyServer(function(input, output, session) {
 		## filter
 		filtered <- filterMatches(mm, max_speed = 30)
 		progress$set(value = 2)
-
-		## add metadata
-		filtered[rv$trips, on = 'trip_id', `:=` (route_id = i.route_id, trip_headsign = i.trip_headsign, shape_id = i.shape_id, service_id = i.service_id, direction_id = i.direction_id)]
-		progress$set(value = 3)
-
-		# add route_short_name from routes
-		filtered[rv$routes, on = 'route_id', `:=` (route_short_name = i.route_short_name)]
-		progress$set(value = 4)
-
-		# add time period
-		time_lu <- if (!is.null(rv$time_lu)) {
-			rv$time_lu
-		} else {
-			data.table(Time = as.integer(3600 * c(0, 6, 9, 15, 19, 24)), TOD = factor(c('Owl', 'AM Peak', 'Midday', 'PM Peak', 'Evening', 'Owl'), levels = c('AM Peak', 'Midday', 'PM Peak', 'Evening', 'Owl'), ordered = TRUE), key = 'Time')
-		}
-		filtered[, `:=` (Time = as.ITime(structure(timestamp, class = c('POSIXct', 'POSIXt'), tz = rv$tz), tz = rv$tz))]
-		ok <- key(filtered)
-		filtered <- time_lu[filtered, on = 'Time', roll = TRUE]
-		setkeyv(filtered, ok)
-		progress$set(value = 5)
-
-		# add day of week
-		filtered[, `:=` (DOW = weekdays(as.Date(as.character(start_date), format = '%Y%m%d')))]
-		progress$set(value = 6)
-
-		# add date range
-		filtered[, `:=` (date_range = paste(range(start_date, na.rm = TRUE), collapse = '\u2013'))]
-		progress$set(value = 7)
-
-		# add service_name
-		if (is.null(rv$service_lu)) rv$service_lu <- lookupService(rv$gtfspath)
-		filtered[rv$service_lu, on = 'service_id', `:=` (service_name = i.service_name)]
-		filtered[, trip_desc := paste(route_short_name, trip_headsign, sep = ' - '), by = 'shape_id']
-		progress$set(value = 8)
 
 		matched(filtered)
 	})
