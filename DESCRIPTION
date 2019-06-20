@@ -31,7 +31,6 @@ Suggests:
     shiny,
     ggplot2,
     leaflet,
-    rgdal,
     shinydashboard,
     stringi
 VignetteBuilder: knitr

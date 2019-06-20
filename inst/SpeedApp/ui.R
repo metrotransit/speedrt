@@ -1,4 +1,4 @@
-libs <- c('speedRT', 'data.table', 'DT', 'd3heatmap', 'ggplot2', 'ggmap', 'leaflet', 'rgeos', 'rgdal', 'shiny', 'shinydashboard', 'sp', 'stringi', 'zoo', 'sf')
+libs <- c('speedRT', 'data.table', 'ggplot2', 'leaflet', 'shiny', 'shinydashboard', 'sf', 'stringi')
 
 suppressMessages(invisible(lapply(libs, library, character.only = TRUE)))
 
